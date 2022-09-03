@@ -1,21 +1,4 @@
-{% comment %}
-
-Custom section added by JadePuma
-Instructions - https://jadepuma.com/blogs/shopify-tutorials/flex-product-image-review-tool
-
-{% endcomment %}
-
 {%- assign id = section.id -%}
-
-{% comment %} Section specific CSS {% endcomment %}
-{%- capture section_css -%}
-
-.photos { display: flex; flex-direction: row; background-color: {{ section.settings.photos-background-color }}; padding: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-.photo { display: flex; flex-direction: column; margin: 10px; }
-.photo div { color: {{ section.settings.text-color }}; }
-
-
-{%- endcapture -%}
 
 {% style %}
 #shopify-section-{{ id }} {
@@ -23,24 +6,14 @@ padding-top: {{ section.settings.padding_top }}px;
 padding-bottom: {{ section.settings.padding_bottom }}px;
 padding-left: {{ section.settings.padding_left }}px;
 padding-right: {{ section.settings.padding_right }}px;
-{% if section.settings.width == 'wide' %}
-width: 100%;
-{% elsif section.settings.width == 'half' %}
-width: 50%;
-{% endif %}
 }
 
-{%
-    render 'css-loop',
-css: section_css,
-id: id
-%}
+.photos { display: flex; flex-direction: row; background-color: {{ section.settings.photos-background-color }}; padding: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.photo { display: flex; flex-direction: column; margin: 10px; }
+.photo div { color: {{ section.settings.text-color }}; }
 
-{%
-    render 'css-loop',
-css: section.settings.custom_css,
-id: id
-%}
+    .aspect-ratio-good { background-color: #c3f6c3; }
+    .aspect-ratio-bad { background-color: #f6c3dd; }
 
 {% endstyle %}
 
@@ -64,28 +37,27 @@ id: id
               {% if section.settings.width == 'wide' or section.settings.width == 'half' %}
               equal-columns--outside-trim
               {% endif %}">
-    <div class="one-whole column content">
 
-      {% render 'heading',
-              title: page.title,
-      heading_tag: 'h1',
-      context: 'page',
-      text_alignment: section.settings.heading_alignment
-      %}
-
-      <h2>Thumbnails</h2>
+    
+    <div class="page-width page-width--standard">
 
       <div class="product-photos">
 
-        {% paginate collections['all'].products by 99 %}
+        {% paginate collections['all'].products by 50 %}
         {% for product in collections['all'].products %}
         <p><a href="/admin/products/{{product.id}}" target="_blank">{{product.title}}</a></p>
         <div class="photos">
           {% for image in product.images %}
-          <div class="photo">
-            <div><img src="{{ image.src | product_img_url: '600' }}"></div>
+            {% assign aspect-ratio = image.aspect_ratio | times: 1 | round: 3 %}
+          <div class="photo {% if aspect-ratio == 1.0 %}aspect-ratio-good{% else %}aspect-ratio-bad{% endif %}">
+            <div><img src="{{ image.src | product_img_url: '250x250' }}"></div>
             <div>Dimensions: {{ image.height }}px X {{ image.width }}px</div>
-            <div>Aspect Ratio: {{ image.aspect_ratio | round: 2 }}</div>
+            <div>Aspect Ratio: {{ aspect-ratio }}</div>
+            {% if aspect-ratio > 1.0 %}
+              <div>Need to crop sides</div>
+            {%  elsif aspect-ratio < 1.0 %}
+              <div>Need to crop top and bottom</div>
+              {% endif %}
           </div>
           {% endfor %}
         </div>
@@ -138,26 +110,6 @@ id: id
 {
 "type": "header",
 "content": "Layout"
-},
-{
-"type": "select",
-"id": "width",
-"label": "Width",
-"default": "wide",
-"options": [
-{
-"value": "half",
-"label": "Half"
-},
-{
-"value": "standard",
-"label": "Standard"
-},
-{
-"value": "wide",
-"label": "Wide"
-}
-]
 },
 {
 "type": "range",
