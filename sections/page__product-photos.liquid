@@ -1,0 +1,261 @@
+{% comment %}
+
+Custom section added by JadePuma
+Instructions - https://jadepuma.com/blogs/shopify-tutorials/flex-product-image-review-tool
+
+{% endcomment %}
+
+{%- assign id = section.id -%}
+
+{% comment %} Section specific CSS {% endcomment %}
+{%- capture section_css -%}
+
+.photos { display: flex; flex-direction: row; background-color: {{ section.settings.photos-background-color }}; padding: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.photo { display: flex; flex-direction: column; margin: 10px; }
+.photo div { color: {{ section.settings.text-color }}; }
+
+
+{%- endcapture -%}
+
+{% style %}
+#shopify-section-{{ id }} {
+padding-top: {{ section.settings.padding_top }}px;
+padding-bottom: {{ section.settings.padding_bottom }}px;
+padding-left: {{ section.settings.padding_left }}px;
+padding-right: {{ section.settings.padding_right }}px;
+{% if section.settings.width == 'wide' %}
+width: 100%;
+{% elsif section.settings.width == 'half' %}
+width: 50%;
+{% endif %}
+}
+
+{%
+    render 'css-loop',
+css: section_css,
+id: id
+%}
+
+{%
+    render 'css-loop',
+css: section.settings.custom_css,
+id: id
+%}
+
+{% endstyle %}
+
+{% comment %} HTML markup {% endcomment %}
+<section class="featured-video
+                section
+                {{ section.settings.css_class }}
+                is-width-{{ section.settings.width }}
+                {% if section.settings.mobile_text_below_video == true %}
+                mobile-text--below-media
+                {% else %}
+                mobile-text--over-media
+                {% endif %}
+                {% if video_exists %} has-video-added {% endif %}
+                video-controls-enabled--{{ section.settings.controls }}"
+         {% if section.settings.animation != "none" %}
+         data-scroll-class="{{ section.settings.animation }}"
+         {% endif %}>
+  <div class="container
+              video__container
+              {% if section.settings.width == 'wide' or section.settings.width == 'half' %}
+              equal-columns--outside-trim
+              {% endif %}">
+    <div class="one-whole column content">
+
+      {% render 'heading',
+              title: page.title,
+      heading_tag: 'h1',
+      context: 'page',
+      text_alignment: section.settings.heading_alignment
+      %}
+
+      <h2>Thumbnails</h2>
+
+      <div class="product-photos">
+
+        {% paginate collections['all'].products by 99 %}
+        {% for product in collections['all'].products %}
+        <p><a href="/admin/products/{{product.id}}" target="_blank">{{product.title}}</a></p>
+        <div class="photos">
+          {% for image in product.images %}
+          <div class="photo">
+            <div><img src="{{ image.src | product_img_url: '600' }}"></div>
+            <div>Dimensions: {{ image.height }}px X {{ image.width }}px</div>
+            <div>Aspect Ratio: {{ image.aspect_ratio | round: 2 }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}        
+
+
+        <div class="container container--pagination">
+          <div class="one-whole column text-align-center">
+            {%- assign load_more_text = 'collections.general.pagination_button' | t -%}
+            {% render 'pagination',
+                  paginate: paginate,
+            pagination_type: basic_pagination,
+            load_more_text: load_more_text
+            %}
+          </div>
+        </div>    
+
+        {% endpaginate %}
+
+      </div> 
+
+    </div>
+  </div>
+
+</section>
+
+
+{% schema %}
+{
+"name": "Product photos",
+"class": "product-photos-section overlaid-header-option",
+"settings": [
+{
+"type": "header",
+"content": "Section headings"
+},
+{
+"type": "color",
+"id": "text-color",
+"label": "Text"
+},
+{
+"type": "color",
+"id": "photos-background-color",
+"label": "Background"
+},
+
+
+
+{
+"type": "header",
+"content": "Layout"
+},
+{
+"type": "select",
+"id": "width",
+"label": "Width",
+"default": "wide",
+"options": [
+{
+"value": "half",
+"label": "Half"
+},
+{
+"value": "standard",
+"label": "Standard"
+},
+{
+"value": "wide",
+"label": "Wide"
+}
+]
+},
+{
+"type": "range",
+"id": "padding_top",
+"label": "Top spacing",
+"min": 0,
+"max": 80,
+"default": 20,
+"unit": "px"
+},
+{
+"type": "range",
+"id": "padding_bottom",
+"label": "Bottom spacing",
+"min": 0,
+"max": 80,
+"default": 0,
+"unit": "px"
+},
+{
+"type": "range",
+"id": "padding_left",
+"label": "Left spacing",
+"min": 0,
+"max": 80,
+"default": 0,
+"unit": "px"
+},
+{
+"type": "range",
+"id": "padding_right",
+"label": "Right spacing",
+"default": 0,
+"min": 0,
+"max": 80,
+"unit": "px"
+},
+{
+"type": "select",
+"id": "animation",
+"label": "Animation",
+"default": "none",
+"options": [
+{
+"value": "none",
+"label": "None"
+},
+{
+"value": "fadeIn",
+"label": "Fade in"
+},
+{
+"value": "fadeInDown",
+"label": "Fade in down"
+},
+{
+"value": "fadeInLeft",
+"label": "Fade in left"
+},
+{
+"value": "fadeInRight",
+"label": "Fade in right"
+},
+{
+"value": "slideInLeft",
+"label": "Slide in left"
+},
+{
+"value": "slideInRight",
+"label": "Slide in right"
+},
+{
+"value": "zoomIn",
+"label": "Zoom in"
+}
+]
+},
+{
+"type": "header",
+"content": "Advanced",
+"info": "[Learn more](https://help.outofthesandbox.com/hc/en-us/articles/360022329373)"
+},
+{
+"type": "text",
+"id": "css_class",
+"label": "CSS Class"
+},
+{
+"type": "textarea",
+"id": "custom_css",
+"label": "Custom CSS"
+}
+],
+
+"presets": [{
+"name": "Product photos",
+"category": "JadePuma"
+}]
+}
+
+{% endschema %}

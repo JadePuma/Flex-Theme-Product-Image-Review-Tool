@@ -1,0 +1,36 @@
+{
+    "sections": {
+      "main": {
+        "type": "page-content__main",
+        "disabled": true,
+        "settings": {
+          "show_heading": true,
+          "heading_alignment": "left",
+          "width": "standard",
+          "padding_top": 40,
+          "padding_bottom": 40,
+          "css_class": "",
+          "custom_css": ""
+        }
+      },
+      "16511141982f60b865": {
+        "type": "page__product-photos",
+        "settings": {
+          "text-color": "#000000",
+          "photos-background-color": "#eeeeee",
+          "width": "wide",
+          "padding_top": 20,
+          "padding_bottom": 20,
+          "padding_left": 20,
+          "padding_right": 20,
+          "animation": "none",
+          "css_class": "",
+          "custom_css": ""
+        }
+      }
+    },
+    "order": [
+      "main",
+      "16511141982f60b865"
+    ]
+  }
