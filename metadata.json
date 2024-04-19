@@ -1,11 +1,13 @@
 {
   "title":"Product-Image-Review-Tool",
-  "repoName":"Flex-Theme-Featured-Articles-Section",
-  "sections":["sections/page__product-photos.liquid"],
-  "snippets":[],
-  "assets":[],
   "content":"content",
   "shortDesc": "Showcase your blog's best with customizable, engaging article highlights right on your store.",
   "videoId": "fezTozTznKs",
-  "templates": ["page", "cart"]
+  "templates": ["page", "cart"],
+  "repoData":{
+    "repoName":"Flex-Theme-Featured-Articles-Section",
+    "sections":["sections/page__product-photos.liquid"],
+    "snippets":[],
+    "assets":[]
+  }
 }
