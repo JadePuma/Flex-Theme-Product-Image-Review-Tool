@@ -1,0 +1,206 @@
+{% comment %} 
+    JP Product Images Tool
+    Custom section created by JadePuma
+    Instructions - https://jadepuma.com/blogs/shopify-tutorials/flex-product-image-review-tool
+    Last editted - 4/29/24
+{% endcomment %}
+
+
+{% style %}
+  .product-name {
+    font-size: 22.5px;
+  }
+  .desired-AR-text {
+    font-size: 24px;
+  }
+
+  .product-photos {
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .product-photo {
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+    padding: 10px;
+    {% if block.settings.photo-size == 'small' %}
+      width: 250px;
+    {% elsif block.settings.photo-size == 'medium' %}
+      width: 400px;
+    {% else %}
+      width: 600px;
+    {% endif %}
+  }
+  .aspect-ratio-good {
+    background-color: #c3f6c3;
+  }
+  .aspect-ratio-bad {
+    background-color: #f6c3dd;
+  }
+
+  .pagination-list li::marker {
+    display: none;
+    color: white;
+  }
+{% endstyle %}
+
+{% assign target-aspect-ratio = block.settings['target-aspect-ratio'] | times: 1 | round: 3 %}
+
+{% comment %} HTML markup {% endcomment %}
+
+<section id="jp-app-block-{{ id }}" class="
+    featured-video
+    section
+    {{ block.settings.css_class }}
+    is-width-{{ block.settings.width }}
+    {% if block.settings.mobile_text_below_video == true %}
+    mobile-text--below-media
+    {% else %}
+    mobile-text--over-media
+    {% endif %}
+    {% if video_exists %} has-video-added {% endif %}
+    video-controls-enabled--{{ block.settings.controls }}
+  ">
+
+  <div class="
+      container
+      video__container
+      {% if block.settings.width == 'wide' or block.settings.width == 'half' %}
+      equal-columns--outside-trim
+      {% endif %}
+    ">
+    <div class="page-width page-width--standard content" style="width:100%;">
+      <h2 class="desired-AR-text has-padding-bottom">Target Aspect Ratio - {{ target-aspect-ratio }}</h2>
+
+      <div id="product-photos-container">
+        {% paginate collections.all.products by block.settings.pagination_limit %}
+          {% for product in collections.all.products %}
+
+            <div>
+              <h3>
+                <a href="/admin/products/{{product.id}}" target="_blank">{{ product.title }}</a>
+              </h3>
+            </div>
+
+            <div class="product-photos" data-url="/admin/products/{{product.id}}">
+              {% for image in product.images %}
+                {% assign aspect-ratio = image.aspect_ratio | times: 1 | round: 3 %}
+                <div class="product-photo {% if aspect-ratio == target-aspect-ratio %}aspect-ratio-good{% else %}aspect-ratio-bad{% endif %}">
+                  <div>
+                    {% if block.settings['photo-size'] == 'small' %}
+                      <img src="{{ image.src | image_url: width: 250, height: 250 }}">
+                    {% elsif block.settings['photo-size'] == 'medium' %}
+                      <img src="{{ image.src | product_img_url: '400x400' }}">
+                    {% else %}
+                      <img src="{{ image.src | product_img_url: '600x600' }}">
+                    {% endif %}
+                  </div>
+                  <div>Dimensions: {{ image.height }}px X {{ image.width }}px</div>
+                  <div>Aspect Ratio: {{ aspect-ratio }}</div>
+                  {% if aspect-ratio > target-aspect-ratio %}
+                    <p>{{ block.settings['instructions-too-wide'] }}</p>
+                  {% elsif aspect-ratio < target-aspect-ratio %}
+                    <p>{{ block.settings['instructions-too-tall'] }}</p>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+
+          <div class="container container--pagination">
+            <div class="one-whole column text-align-center">
+              {% render 'basic-pagination'
+                , paginate: paginate %}
+            </div>
+          </div>
+        {% endpaginate %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.getElementById('product-photos-container').addEventListener('click', (e) => {
+        let targetElement = e.target;
+        while (targetElement != null && !targetElement.classList.contains('product-photos')) {
+      targetElement = targetElement.parentNode;
+    }
+  
+    // If a matching element was found and it has a data-url attribute, redirect
+    if (targetElement && targetElement.dataset.url) {
+      window.open(targetElement.dataset.url, '_blank');
+    }
+  })
+</script>
+
+
+{% schema %}
+  {
+    "name": "JP Product Images Tool",
+    "class": "product-photos-section overlaid-header-option",
+    "target": "section",
+    "templates": ["page"],
+    "available_if": "{{ app.metafields.jadepuma_components.hide_block }}",
+    "settings": [
+      {
+        "type": "range",
+        "id": "pagination_limit",
+        "label": "Products per page",
+        "min": 10,
+        "max": 500,
+        "step": 10,
+        "default": 250,
+        "info": "Decrease this if the page is taking to long to load."
+      },
+      {
+        "type": "header",
+        "content": "Photos"
+      },
+      {
+        "type": "select",
+        "id": "photo-size",
+        "label": "Photo size",
+        "default": "medium",
+        "options": [
+          {
+            "value": "small",
+            "label": "Small"
+          },
+          {
+            "value": "medium",
+            "label": "Medium"
+          },
+          {
+            "value": "large",
+            "label": "Large"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "id": "target-aspect-ratio",
+        "label": "Target Aspect Ratio",
+        "default": "1.0",
+        "info": "If AR is less than 1 there must be a 0 before the decimal (e.g. 0.1 NOT .1)."
+      },
+      {
+        "type": "textarea",
+        "id": "instructions-too-tall",
+        "label": "Instructions when image is too tall",
+        "default": "Add padding to sides"
+      },
+      {
+        "type": "textarea",
+        "id": "instructions-too-wide",
+        "label": "Instructions when image is too wide",
+        "default": "Add padding to top and bottom"
+      }
+
+    ]
+  }
+{% endschema %}
