@@ -1,9 +1,13 @@
 {% comment %} 
-    JP Product Images Tool
-    Custom section created by JadePuma
-    Instructions - https://jadepuma.com/blogs/shopify-tutorials/flex-product-image-review-tool
-    Last editted - 4/29/24
+      JP Product Images Tool
+      Custom section created by JadePuma
+      Last editted - 6/2/24
 {% endcomment %}
+
+{% liquid
+  assign s = section
+  assign ss = s.settings
+%}
 
 
 {% style %}
@@ -28,9 +32,9 @@
     flex-direction: column;
     margin: 10px;
     padding: 10px;
-    {% if block.settings.photo-size == 'small' %}
+    {% if ss.photo-size == 'small' %}
       width: 250px;
-    {% elsif block.settings.photo-size == 'medium' %}
+    {% elsif ss.photo-size == 'medium' %}
       width: 400px;
     {% else %}
       width: 600px;
@@ -49,36 +53,24 @@
   }
 {% endstyle %}
 
-{% assign target-aspect-ratio = block.settings['target-aspect-ratio'] | times: 1 | round: 3 %}
+{% assign target-aspect-ratio = ss['target-aspect-ratio'] | times: 1 | round: 3 %}
 
 {% comment %} HTML markup {% endcomment %}
-
-<section id="jp-app-block-{{ id }}" class="
+<section class="
     featured-video
     section
-    {{ block.settings.css_class }}
-    is-width-{{ block.settings.width }}
-    {% if block.settings.mobile_text_below_video == true %}
-    mobile-text--below-media
-    {% else %}
-    mobile-text--over-media
-    {% endif %}
-    {% if video_exists %} has-video-added {% endif %}
-    video-controls-enabled--{{ block.settings.controls }}
+    is-width-standard
   ">
 
   <div class="
       container
       video__container
-      {% if block.settings.width == 'wide' or block.settings.width == 'half' %}
-      equal-columns--outside-trim
-      {% endif %}
     ">
     <div class="page-width page-width--standard content" style="width:100%;">
-      <h2 class="desired-AR-text has-padding-bottom">Target Aspect Ratio - {{ target-aspect-ratio }}</h2>
+      <h2 class="desired-AR-text has-padding-bottom has-margin-top has-padding-top">Target Aspect Ratio - {{ target-aspect-ratio }}</h2>
 
       <div id="product-photos-container">
-        {% paginate collections.all.products by block.settings.pagination_limit %}
+        {% paginate collections.all.products by ss.pagination_limit %}
           {% for product in collections.all.products %}
 
             <div>
@@ -92,20 +84,20 @@
                 {% assign aspect-ratio = image.aspect_ratio | times: 1 | round: 3 %}
                 <div class="product-photo {% if aspect-ratio == target-aspect-ratio %}aspect-ratio-good{% else %}aspect-ratio-bad{% endif %}">
                   <div>
-                    {% if block.settings['photo-size'] == 'small' %}
+                    {% if ss['photo-size'] == 'small' %}
                       <img src="{{ image.src | image_url: width: 250, height: 250 }}">
-                    {% elsif block.settings['photo-size'] == 'medium' %}
+                    {% elsif ss['photo-size'] == 'medium' %}
                       <img src="{{ image.src | product_img_url: '400x400' }}">
                     {% else %}
                       <img src="{{ image.src | product_img_url: '600x600' }}">
                     {% endif %}
                   </div>
-                  <div>Dimensions: {{ image.height }}px X {{ image.width }}px</div>
-                  <div>Aspect Ratio: {{ aspect-ratio }}</div>
+                  <div class="text-align-center">Dimensions: {{ image.height }}px X {{ image.width }}px</div>
+                  <div class="text-align-center">Aspect Ratio: {{ aspect-ratio }}</div>
                   {% if aspect-ratio > target-aspect-ratio %}
-                    <p>{{ block.settings['instructions-too-wide'] }}</p>
+                    <p class="text-align-center">{{ ss['instructions-too-wide'] }}</p>
                   {% elsif aspect-ratio < target-aspect-ratio %}
-                    <p>{{ block.settings['instructions-too-tall'] }}</p>
+                    <p class="text-align-center">{{ ss['instructions-too-tall'] }}</p>
                   {% endif %}
                 </div>
               {% endfor %}
@@ -114,7 +106,7 @@
 
           <div class="container container--pagination">
             <div class="one-whole column text-align-center">
-              {% render 'basic-pagination'
+              {% render 'pagination'
                 , paginate: paginate %}
             </div>
           </div>
@@ -167,12 +159,10 @@
           {
             "value": "small",
             "label": "Small"
-          },
-          {
+          }, {
             "value": "medium",
             "label": "Medium"
-          },
-          {
+          }, {
             "value": "large",
             "label": "Large"
           }
@@ -184,14 +174,12 @@
         "label": "Target Aspect Ratio",
         "default": "1.0",
         "info": "If AR is less than 1 there must be a 0 before the decimal (e.g. 0.1 NOT .1)."
-      },
-      {
+      }, {
         "type": "textarea",
         "id": "instructions-too-tall",
         "label": "Instructions when image is too tall",
         "default": "Add padding to sides"
-      },
-      {
+      }, {
         "type": "textarea",
         "id": "instructions-too-wide",
         "label": "Instructions when image is too wide",
